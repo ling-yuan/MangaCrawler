@@ -19,9 +19,11 @@ class MhItem(scrapy.Item):
     mh_url = scrapy.Field()
     mh_chapter_list = scrapy.Field()
     mh_chapter_length = scrapy.Field()
+    mh_refer = scrapy.Field()
 
 
 class ChapterItem(scrapy.Item):
+    chapter_num = scrapy.Field()
     chapter_url = scrapy.Field()
     chapter_title = scrapy.Field()
     chapter_time = scrapy.Field()
