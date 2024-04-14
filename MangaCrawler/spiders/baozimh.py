@@ -15,7 +15,7 @@ class BaozimhSpider(scrapy.Spider):
 
     def start_requests(self) -> Iterable[Request]:
         '''起始请求'''
-        for i in range(1, 2):  # 991
+        for i in range(1, 992):  # 991页
             url = f'https://baozimh.one/manga/page/{i}'
             yield Request(url=url, callback=self.parse_mhlist)
 
@@ -31,6 +31,7 @@ class BaozimhSpider(scrapy.Spider):
             mh_title = mh.css('h3.cardtitle::text').extract_first().strip()
 
             mh_item = MhItem()
+            mh_item['mh_refer'] = 'baozimh'
             mh_item['mh_title'] = mh_title
             mh_item['mh_url'] = mh_url
             mh_item['mh_chapter_list'] = []
@@ -48,6 +49,7 @@ class BaozimhSpider(scrapy.Spider):
         chapter_list = sel.css('#chapterlists > div > a')
         mh_item['mh_chapter_length'] = len(chapter_list)
 
+        i = 0
         for chapter in chapter_list:
             chapter_url = chapter.css('::attr(href)').extract_first() or ''
             if chapter_url == '':
@@ -57,15 +59,18 @@ class BaozimhSpider(scrapy.Spider):
             chapter_title = chapter.css('div > span:nth-child(1)::text').extract_first()
             chapter_time = chapter.css('div > span:nth-child(2)::text').extract_first()
 
-            yield Request(url=chapter_url, callback=self.parse_chapter, cb_kwargs={'chapter_title': chapter_title.strip(), 'chapter_time': chapter_time.strip(), 'chapter_url': chapter_url.strip(), 'mh_item': mh_item})
+            i += 1
+            yield Request(url=chapter_url, callback=self.parse_chapter, cb_kwargs={'chapter_num': i, 'chapter_title': chapter_title.strip(), 'chapter_time': chapter_time.strip(), 'chapter_url': chapter_url.strip(), 'mh_item': mh_item})
 
     def parse_chapter(self, response: Response, **kwargs):
         '''解析漫画章节内容'''
 
         chapter_item = ChapterItem()
+        chapter_item['chapter_num'] = kwargs['chapter_num']
         chapter_item['chapter_title'] = kwargs['chapter_title']
         chapter_item['chapter_time'] = kwargs['chapter_time']
         chapter_item['chapter_url'] = kwargs['chapter_url']
+        print(chapter_item)
 
         sel = Selector(response)
         img_list = sel.css('div.w-full.h-full > img::attr(data-src)').extract()
