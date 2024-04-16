@@ -1,2 +1,3 @@
 # MangaCrawler
-获取baozimh等网站漫画数据
+
+获取baozimh、dmzj网站漫画数据
